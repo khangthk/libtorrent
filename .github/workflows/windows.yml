@@ -19,8 +19,8 @@ jobs:
       strategy:
          matrix:
            include:
-             - config: address-model=32
-             - config: address-model=64 crypto=openssl
+             - config: address-model=32 crypto=built-in
+             - config: address-model=64
              - config: release
 
       steps:
@@ -30,7 +30,6 @@ jobs:
            submodules: true
 
       - name: install openssl (64 bit)
-        if: ${{ contains(matrix.config, 'crypto=openssl') }}
         shell: pwsh
         run: choco install openssl
 
@@ -101,14 +100,14 @@ jobs:
           set BOOST_ROOT=%CD%\boost
           set PATH=%BOOST_ROOT%;%PATH%
           cd simulation
-          b2 --hash address-model=64 link=static debug-iterators=off invariant-checks=on crypto=built-in define=BOOST_ASIO_DISABLE_IOCP asserts=on testing.execute=off
+          b2 --hash crypto=built-in address-model=64 link=static debug-iterators=off invariant-checks=on crypto=built-in define=BOOST_ASIO_DISABLE_IOCP asserts=on testing.execute=off
 
       - name: run sims
         run: |
           set BOOST_ROOT=%CD%\boost
           set PATH=%BOOST_ROOT%;%PATH%
           cd simulation
-          b2 --hash -l500 address-model=64 link=static debug-iterators=off invariant-checks=on crypto=built-in define=BOOST_ASIO_DISABLE_IOCP asserts=on
+          b2 --hash -l500 crypto=built-in address-model=64 link=static debug-iterators=off invariant-checks=on crypto=built-in define=BOOST_ASIO_DISABLE_IOCP asserts=on
 
    build:
       name: Build
@@ -133,6 +132,10 @@ jobs:
           git clone --depth=1 --recurse-submodules -j10 --branch=boost-1.72.0 https://github.com/boostorg/boost.git
           cd boost
           bootstrap.bat
+
+      - name: install openssl (64 bit)
+        shell: pwsh
+        run: choco install openssl
 
       - name: boost headers
         run: |
